@@ -1,5 +1,5 @@
 import LoginButton from './components/LoginButton';
-import OrdersDashboard from './components/OrdersDashboard';
+import CasesDashboard from './components/OrdersDashboard';
 
 export default function Home() {
   return (
@@ -10,7 +10,7 @@ export default function Home() {
           <div className="flex justify-between items-center py-4">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Cosmic Deals Portal</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Customer Order Management</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Customer Case Management</p>
             </div>
             <LoginButton />
           </div>
@@ -19,7 +19,7 @@ export default function Home() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <OrdersDashboard />
+        <CasesDashboard />
       </main>
     </div>
   );

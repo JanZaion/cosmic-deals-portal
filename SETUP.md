@@ -1,6 +1,6 @@
 # Cosmic Deals Portal Setup Guide
 
-This customer portal integrates with Microsoft Dynamics 365 to display customer orders and their status.
+This customer portal integrates with Microsoft Dynamics 365 to display customer cases and their status.
 
 ## Prerequisites
 
@@ -76,22 +76,40 @@ The application will be available at `http://localhost:3000`.
 ## Features
 
 - **Microsoft Authentication**: Users sign in with their Microsoft account
-- **Order Dashboard**: Display all customer orders from Dynamics
-- **Order Status**: Visual indicators for different order states
+- **Cases Dashboard**: Display all customer cases from Dynamics
+- **Case Status & State**: Visual indicators for different case states and statuses
+- **Priority Indicators**: Color-coded priority levels (High, Normal, Low)
 - **Responsive Design**: Works on desktop and mobile devices
-- **Real-time Data**: Orders are fetched directly from Dynamics Web API
+- **Real-time Data**: Cases are fetched directly from Dynamics Web API
 
-## Order Status Mapping
+## Case Status Mapping
 
-The portal maps Dynamics order status codes to user-friendly labels:
+The portal maps Dynamics case status codes to user-friendly labels:
 
-- `100000000`: New
-- `100000001`: Pending
-- `100000002`: Won
-- `100000003`: Canceled
-- `100000004`: Fulfilled
-- `100000005`: Invoiced
-- `100000006`: Closed
+- `1`: In Progress
+- `2`: On Hold
+- `3`: Waiting for Details
+- `4`: Researching
+- `5`: Problem Solved
+- `1000`: Information Provided
+- `2000`: Canceled
+- `5000`: Merged
+
+## Case State Mapping
+
+The portal also displays case states:
+
+- `0`: Active
+- `1`: Resolved
+- `2`: Canceled
+
+## Priority Levels
+
+Cases display priority with color coding:
+
+- `1`: High (Red)
+- `2`: Normal (Blue)
+- `3`: Low (Gray)
 
 ## Troubleshooting
 
@@ -107,25 +125,27 @@ The portal maps Dynamics order status codes to user-friendly labels:
 - Ensure the user has appropriate permissions in Dynamics
 - Check browser console for detailed error messages
 
-### No Orders Displayed
+### No Cases Displayed
 
-- Verify there are sales orders in your Dynamics instance
-- Check that the user has permissions to view orders
-- The current implementation fetches all orders (you may want to filter by customer)
+- Verify there are cases (incidents) in your Dynamics instance
+- Check that the user has permissions to view cases
+- The current implementation fetches all cases (you may want to filter by customer)
 
 ## Security Notes
 
 - Never commit `.env.local` to version control
 - In production, use environment variables or secure configuration management
 - Consider implementing additional authorization checks based on your requirements
-- The current implementation fetches all orders - you may want to add customer-specific filtering
+- The current implementation fetches all cases - you may want to add customer-specific filtering
 
 ## Next Steps
 
 To enhance the portal, consider:
 
-1. Adding customer-specific order filtering
-2. Implementing order details view
-3. Adding order search and filtering capabilities
-4. Integrating with other Dynamics entities (contacts, accounts)
-5. Adding order status update functionality (if needed)
+1. Adding customer-specific case filtering
+2. Implementing case details view with full case description
+3. Adding case search and filtering capabilities
+4. Integrating with other Dynamics entities (contacts, accounts, knowledge base)
+5. Adding case status update functionality (if needed)
+6. Implementing case creation functionality for customers
+7. Adding file attachments support for cases

@@ -1,25 +1,26 @@
 import axios, { AxiosResponse } from 'axios';
 
-export interface Order {
-  salesorderid: string;
-  name: string;
-  totalamount: number;
+export interface Case {
+  incidentid: string;
+  title: string;
   statuscode: number;
   statecode: number;
+  prioritycode: number;
+  caseorigincode: number;
   createdon: string;
   modifiedon: string;
   customerid_contact?: {
     fullname: string;
     contactid: string;
   };
-  orderstatuscode?: {
-    label: string;
-    value: number;
+  customerid_account?: {
+    name: string;
+    accountid: string;
   };
 }
 
-export interface OrderResponse {
-  'value': Order[];
+export interface CaseResponse {
+  'value': Case[];
   '@odata.count'?: number;
 }
 
@@ -46,13 +47,14 @@ class DynamicsApiService {
     };
   }
 
-  async getOrders(customerId?: string): Promise<Order[]> {
+  async getCases(customerId?: string): Promise<Case[]> {
     try {
-      let url = `${this.baseUrl}/salesorders`;
+      let url = `${this.baseUrl}/incidents`;
 
       // Add expand to get related data
-      const expand = '$expand=customerid_contact($select=fullname,contactid)';
-      const select = '$select=salesorderid,name,totalamount,statuscode,statecode,createdon,modifiedon';
+      const expand =
+        '$expand=customerid_contact($select=fullname,contactid),customerid_account($select=name,accountid)';
+      const select = '$select=incidentid,title,statuscode,statecode,prioritycode,caseorigincode,createdon,modifiedon';
       const orderBy = '$orderby=createdon desc';
 
       let queryParams = `?${select}&${expand}&${orderBy}`;
@@ -64,66 +66,98 @@ class DynamicsApiService {
 
       url += queryParams;
 
-      const response: AxiosResponse<OrderResponse> = await axios.get(url, {
+      const response: AxiosResponse<CaseResponse> = await axios.get(url, {
         headers: this.getHeaders(),
       });
 
       return response.data.value || [];
     } catch (error) {
-      console.error('Error fetching orders:', error);
-      throw new Error('Failed to fetch orders from Dynamics');
+      console.error('Error fetching cases:', error);
+      throw new Error('Failed to fetch cases from Dynamics');
     }
   }
 
-  async getOrderById(orderId: string): Promise<Order | null> {
+  async getCaseById(caseId: string): Promise<Case | null> {
     try {
-      const url = `${this.baseUrl}/salesorders(${orderId})`;
-      const expand = '$expand=customerid_contact($select=fullname,contactid)';
-      const select = '$select=salesorderid,name,totalamount,statuscode,statecode,createdon,modifiedon';
+      const url = `${this.baseUrl}/incidents(${caseId})`;
+      const expand =
+        '$expand=customerid_contact($select=fullname,contactid),customerid_account($select=name,accountid)';
+      const select = '$select=incidentid,title,statuscode,statecode,prioritycode,caseorigincode,createdon,modifiedon';
 
-      const response: AxiosResponse<Order> = await axios.get(`${url}?${select}&${expand}`, {
+      const response: AxiosResponse<Case> = await axios.get(`${url}?${select}&${expand}`, {
         headers: this.getHeaders(),
       });
 
       return response.data;
     } catch (error) {
-      console.error('Error fetching order:', error);
+      console.error('Error fetching case:', error);
       return null;
     }
   }
 
-  // Helper method to get status label
+  // Helper method to get case status label
   getStatusLabel(statusCode: number): string {
     const statusMap: { [key: number]: string } = {
-      1: 'Active',
-      2: 'Inactive',
-      100000000: 'New',
-      100000001: 'Pending',
-      100000002: 'Won',
-      100000003: 'Canceled',
-      100000004: 'Fulfilled',
-      100000005: 'Invoiced',
-      100000006: 'Closed',
+      1: 'In Progress',
+      2: 'On Hold',
+      3: 'Waiting for Details',
+      4: 'Researching',
+      5: 'Problem Solved',
+      1000: 'Information Provided',
+      2000: 'Canceled',
+      5000: 'Merged',
     };
 
     return statusMap[statusCode] || 'Unknown';
   }
 
+  // Helper method to get case state label
+  getStateLabel(stateCode: number): string {
+    const stateMap: { [key: number]: string } = {
+      0: 'Active',
+      1: 'Resolved',
+      2: 'Canceled',
+    };
+
+    return stateMap[stateCode] || 'Unknown';
+  }
+
+  // Helper method to get priority label
+  getPriorityLabel(priorityCode: number): string {
+    const priorityMap: { [key: number]: string } = {
+      1: 'High',
+      2: 'Normal',
+      3: 'Low',
+    };
+
+    return priorityMap[priorityCode] || 'Normal';
+  }
+
   // Helper method to get status color for UI
   getStatusColor(statusCode: number): string {
     const colorMap: { [key: number]: string } = {
-      1: 'bg-green-100 text-green-800',
-      2: 'bg-gray-100 text-gray-800',
-      100000000: 'bg-blue-100 text-blue-800',
-      100000001: 'bg-yellow-100 text-yellow-800',
-      100000002: 'bg-green-100 text-green-800',
-      100000003: 'bg-red-100 text-red-800',
-      100000004: 'bg-purple-100 text-purple-800',
-      100000005: 'bg-indigo-100 text-indigo-800',
-      100000006: 'bg-gray-100 text-gray-800',
+      1: 'bg-blue-100 text-blue-800', // In Progress
+      2: 'bg-yellow-100 text-yellow-800', // On Hold
+      3: 'bg-orange-100 text-orange-800', // Waiting for Details
+      4: 'bg-purple-100 text-purple-800', // Researching
+      5: 'bg-green-100 text-green-800', // Problem Solved
+      1000: 'bg-green-100 text-green-800', // Information Provided
+      2000: 'bg-red-100 text-red-800', // Canceled
+      5000: 'bg-gray-100 text-gray-800', // Merged
     };
 
     return colorMap[statusCode] || 'bg-gray-100 text-gray-800';
+  }
+
+  // Helper method to get priority color for UI
+  getPriorityColor(priorityCode: number): string {
+    const colorMap: { [key: number]: string } = {
+      1: 'bg-red-100 text-red-800', // High
+      2: 'bg-blue-100 text-blue-800', // Normal
+      3: 'bg-gray-100 text-gray-800', // Low
+    };
+
+    return colorMap[priorityCode] || 'bg-blue-100 text-blue-800';
   }
 }
 
