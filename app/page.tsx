@@ -27,26 +27,6 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <CasesDashboard />
       </main>
-
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 mt-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6 text-sm text-slate-600">
-              <span>© 2024 Cosmic Deals Portal</span>
-              <span>•</span>
-              <span>Powered by Microsoft Dynamics 365</span>
-              <span>•</span>
-              <span>Enterprise Edition</span>
-            </div>
-            <div className="flex items-center space-x-4 text-sm text-slate-500">
-              <span>Version 2.1.0</span>
-              <span>•</span>
-              <span>Last Updated: Today</span>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
