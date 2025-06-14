@@ -1,10 +1,23 @@
 import { Configuration, PopupRequest } from '@azure/msal-browser';
 
+// Validate required environment variables
+if (typeof window !== 'undefined') {
+  if (!process.env.NEXT_PUBLIC_AZURE_AD_CLIENT_ID) {
+    console.error('Missing NEXT_PUBLIC_AZURE_AD_CLIENT_ID environment variable');
+  }
+  if (!process.env.NEXT_PUBLIC_AZURE_AD_TENANT_ID) {
+    console.error('Missing NEXT_PUBLIC_AZURE_AD_TENANT_ID environment variable');
+  }
+  if (!process.env.NEXT_PUBLIC_DYNAMICS_URL) {
+    console.error('Missing NEXT_PUBLIC_DYNAMICS_URL environment variable');
+  }
+}
+
 // MSAL configuration
 export const msalConfig: Configuration = {
   auth: {
     clientId: process.env.NEXT_PUBLIC_AZURE_AD_CLIENT_ID || '',
-    authority: `https://login.microsoftonline.com/${process.env.NEXT_PUBLIC_AZURE_AD_TENANT_ID || 'common'}`,
+    authority: `https://login.microsoftonline.com/${process.env.NEXT_PUBLIC_AZURE_AD_TENANT_ID}`,
     redirectUri: process.env.NEXT_PUBLIC_AZURE_AD_REDIRECT_URI || 'http://localhost:3000',
   },
   cache: {
