@@ -63,7 +63,7 @@ AZURE_AD_TENANT_ID=your-tenant-id-here
 AZURE_AD_REDIRECT_URI=http://localhost:3000
 ```
 
-**Security Note**: These environment variables are NOT prefixed with `NEXT_PUBLIC_`, which means they remain secure on the server-side and are not exposed to the client-side JavaScript bundle. The application uses Next.js server actions to fetch these configurations securely.
+**Security Note**: These environment variables are NOT prefixed with `NEXT_PUBLIC_`, which means they remain secure on the server-side and are not exposed to the client-side JavaScript bundle. The application uses secure API routes to fetch these configurations from the server.
 
 Replace the placeholder values with your actual configuration.
 
@@ -138,7 +138,7 @@ Cases display priority with color coding:
 - Never commit `.env.local` to version control
 - In production, use environment variables or secure configuration management
 - **Enhanced Security**: This application now uses server-side environment variables instead of client-side `NEXT_PUBLIC_` variables, preventing sensitive configuration from being exposed in the browser
-- **Server Actions**: Configuration is fetched securely using Next.js server actions at runtime
+- **API Routes**: Configuration is fetched securely using Next.js API routes at runtime
 - Consider implementing additional authorization checks based on your requirements
 - The current implementation fetches all cases - you may want to add customer-specific filtering
 
@@ -147,7 +147,7 @@ Cases display priority with color coding:
 This version of the portal includes significant security enhancements:
 
 - **No Client-Side Exposure**: Sensitive configuration like Azure AD client IDs, tenant IDs, and Dynamics URLs are no longer exposed to the client-side JavaScript bundle
-- **Server-Side Configuration**: All sensitive configuration is handled server-side using Next.js server actions
+- **Server-Side Configuration**: All sensitive configuration is handled server-side using Next.js API routes
 - **Runtime Configuration**: Configuration is fetched securely at runtime rather than being embedded in the build
 - **Better Compliance**: Meets security best practices by keeping sensitive data on the server
 

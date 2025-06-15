@@ -8,7 +8,6 @@ import {
   Configuration,
   PopupRequest,
 } from '@azure/msal-browser';
-import { getAuthConfig } from '../lib/auth-actions';
 import { dynamicsApi } from '../lib/dynamics-api';
 
 interface AuthContextType {
@@ -36,9 +35,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (typeof window === 'undefined') return;
 
       try {
-        // First, get the auth configuration from the server
+        // First, get the auth configuration from the API route
         if (!configLoaded) {
-          const authConfig = await getAuthConfig();
+          const response = await fetch('/api/auth-config');
+          if (!response.ok) {
+            throw new Error('Failed to fetch auth configuration');
+          }
+
+          const authConfig = await response.json();
           msalConfig = authConfig.msalConfig;
           loginRequest = authConfig.loginRequest;
 

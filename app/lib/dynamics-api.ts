@@ -1,5 +1,4 @@
 import axios, { AxiosResponse } from 'axios';
-import { getDynamicsConfig } from './auth-actions';
 
 export interface Case {
   incidentid: string;
@@ -32,7 +31,12 @@ class DynamicsApiService {
 
   private async initializeConfig() {
     if (!this.configInitialized) {
-      const config = await getDynamicsConfig();
+      const response = await fetch('/api/dynamics-config');
+      if (!response.ok) {
+        throw new Error('Failed to fetch Dynamics configuration');
+      }
+
+      const config = await response.json();
       this.baseUrl = config.baseUrl;
       this.configInitialized = true;
     }
