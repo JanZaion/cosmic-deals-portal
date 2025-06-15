@@ -17,16 +17,19 @@ import { dynamicsApi, Case } from '../lib/dynamics-api';
 import { useAuth } from './AuthProvider';
 
 export default function CasesDashboard() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, dynamicsReady } = useAuth();
   const [cases, setCases] = useState<Case[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isAuthenticated && user) {
+    if (isAuthenticated && user && dynamicsReady) {
       fetchCases();
+    } else if (isAuthenticated && user && !dynamicsReady) {
+      setLoading(true);
+      setError(null);
     }
-  }, [isAuthenticated, user]);
+  }, [isAuthenticated, user, dynamicsReady]);
 
   const fetchCases = async () => {
     try {
@@ -112,6 +115,11 @@ export default function CasesDashboard() {
   }
 
   if (loading) {
+    const loadingMessage =
+      isAuthenticated && !dynamicsReady
+        ? 'Initializing Dynamics connection...'
+        : 'Retrieving your case data from Microsoft Dynamics...';
+
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="text-center bg-white p-12 rounded-2xl shadow-xl border border-slate-200">
@@ -119,7 +127,7 @@ export default function CasesDashboard() {
             <FiRefreshCw className="h-8 w-8 text-blue-600 animate-spin" />
           </div>
           <h3 className="text-xl font-semibold text-slate-900 mb-2">Loading Dashboard</h3>
-          <p className="text-slate-600">Retrieving your case data from Microsoft Dynamics...</p>
+          <p className="text-slate-600">{loadingMessage}</p>
         </div>
       </div>
     );
@@ -136,7 +144,8 @@ export default function CasesDashboard() {
           <p className="text-slate-600 mb-6">{error}</p>
           <button
             onClick={fetchCases}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+            disabled={!dynamicsReady}
+            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             Retry Connection
           </button>
@@ -159,7 +168,8 @@ export default function CasesDashboard() {
             </div>
             <button
               onClick={fetchCases}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
+              disabled={!dynamicsReady}
+              className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex items-center space-x-2"
             >
               <FiRefreshCw className="h-4 w-4" />
               <span>Refresh Data</span>

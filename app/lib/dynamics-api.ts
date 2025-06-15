@@ -24,10 +24,28 @@ export interface CaseResponse {
   '@odata.count'?: number;
 }
 
+interface DynamicsConfig {
+  baseUrl: string;
+  dynamicsUrl: string;
+  apiVersion: string;
+  scopes: string[];
+}
+
 class DynamicsApiService {
   private baseUrl: string | null = null;
   private accessToken: string | null = null;
   private configInitialized: boolean = false;
+
+  async initialize(config: DynamicsConfig) {
+    this.baseUrl = config.baseUrl;
+    this.configInitialized = true;
+  }
+
+  clearConfig() {
+    this.baseUrl = null;
+    this.accessToken = null;
+    this.configInitialized = false;
+  }
 
   private async initializeConfig() {
     if (!this.configInitialized) {
@@ -37,16 +55,23 @@ class DynamicsApiService {
       }
 
       const config = await response.json();
-      this.baseUrl = config.baseUrl;
-      this.configInitialized = true;
+      await this.initialize(config);
     }
   }
 
   setAccessToken(token: string) {
+    if (!token || token === 'null' || token === 'undefined') {
+      console.error('Invalid access token provided:', token);
+      throw new Error('Invalid access token provided');
+    }
     this.accessToken = token;
   }
 
   private getHeaders() {
+    if (!this.accessToken) {
+      throw new Error('Access token not set. Please authenticate first.');
+    }
+
     return {
       'Authorization': `Bearer ${this.accessToken}`,
       'Content-Type': 'application/json',
@@ -63,6 +88,10 @@ class DynamicsApiService {
 
       if (!this.baseUrl) {
         throw new Error('Dynamics API configuration not initialized');
+      }
+
+      if (!this.accessToken) {
+        throw new Error('Access token not available. Please login first.');
       }
 
       let url = `${this.baseUrl}/incidents`;
@@ -89,6 +118,17 @@ class DynamicsApiService {
       return response.data.value || [];
     } catch (error) {
       console.error('Error fetching cases:', error);
+
+      // Add more specific error information
+      if (axios.isAxiosError(error)) {
+        console.error('Axios error details:', {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          headers: error.config?.headers,
+        });
+      }
+
       throw new Error('Failed to fetch cases from Dynamics');
     }
   }
@@ -99,6 +139,10 @@ class DynamicsApiService {
 
       if (!this.baseUrl) {
         throw new Error('Dynamics API configuration not initialized');
+      }
+
+      if (!this.accessToken) {
+        throw new Error('Access token not available. Please login first.');
       }
 
       const url = `${this.baseUrl}/incidents(${caseId})`;

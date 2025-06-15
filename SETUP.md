@@ -63,7 +63,12 @@ AZURE_AD_TENANT_ID=your-tenant-id-here
 AZURE_AD_REDIRECT_URI=http://localhost:3000
 ```
 
-**Security Note**: These environment variables are NOT prefixed with `NEXT_PUBLIC_`, which means they remain secure on the server-side and are not exposed to the client-side JavaScript bundle. The application uses secure API routes to fetch these configurations from the server.
+**Security Note**: These environment variables are NOT prefixed with `NEXT_PUBLIC_`, which means they remain secure on the server-side and are not exposed to the client-side JavaScript bundle. The application uses a **staged authentication approach**:
+
+1. **Pre-Authentication**: Only Azure AD configuration is fetched (needed for login)
+2. **Post-Authentication**: Dynamics configuration is fetched only after successful authentication
+
+This ensures that sensitive Dynamics configuration is never exposed to unauthenticated users.
 
 Replace the placeholder values with your actual configuration.
 
@@ -147,6 +152,7 @@ Cases display priority with color coding:
 This version of the portal includes significant security enhancements:
 
 - **No Client-Side Exposure**: Sensitive configuration like Azure AD client IDs, tenant IDs, and Dynamics URLs are no longer exposed to the client-side JavaScript bundle
+- **Staged Authentication**: Dynamics configuration is only fetched after successful authentication, ensuring sensitive endpoints are never exposed to unauthenticated users
 - **Server-Side Configuration**: All sensitive configuration is handled server-side using Next.js API routes
 - **Runtime Configuration**: Configuration is fetched securely at runtime rather than being embedded in the build
 - **Better Compliance**: Meets security best practices by keeping sensitive data on the server

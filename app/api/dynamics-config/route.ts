@@ -4,6 +4,7 @@ interface DynamicsConfig {
   baseUrl: string;
   dynamicsUrl: string;
   apiVersion: string;
+  scopes: string[];
 }
 
 export async function GET() {
@@ -19,6 +20,7 @@ export async function GET() {
       baseUrl: `${dynamicsUrl}/api/data/v${dynamicsApiVersion}`,
       dynamicsUrl,
       apiVersion: dynamicsApiVersion,
+      scopes: [`${dynamicsUrl}/.default`], // OAuth scopes for Dynamics
     };
 
     return NextResponse.json(config);
