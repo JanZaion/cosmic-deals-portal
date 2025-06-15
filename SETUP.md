@@ -53,15 +53,17 @@ From your Dynamics instance:
 Create a `.env.local` file in the project root with the following:
 
 ```bash
-# Microsoft Dynamics Configuration
-NEXT_PUBLIC_DYNAMICS_URL=https://yourorg.crm.dynamics.com
-NEXT_PUBLIC_DYNAMICS_API_VERSION=9.2
+# Microsoft Dynamics Configuration (Server-side only - NOT exposed to client)
+DYNAMICS_URL=https://yourorg.crm.dynamics.com
+DYNAMICS_API_VERSION=9.2
 
-# Azure AD Configuration for Authentication
-NEXT_PUBLIC_AZURE_AD_CLIENT_ID=your-client-id-here
-NEXT_PUBLIC_AZURE_AD_TENANT_ID=your-tenant-id-here
-NEXT_PUBLIC_AZURE_AD_REDIRECT_URI=http://localhost:3000
+# Azure AD Configuration for Authentication (Server-side only - NOT exposed to client)
+AZURE_AD_CLIENT_ID=your-client-id-here
+AZURE_AD_TENANT_ID=your-tenant-id-here
+AZURE_AD_REDIRECT_URI=http://localhost:3000
 ```
+
+**Security Note**: These environment variables are NOT prefixed with `NEXT_PUBLIC_`, which means they remain secure on the server-side and are not exposed to the client-side JavaScript bundle. The application uses Next.js server actions to fetch these configurations securely.
 
 Replace the placeholder values with your actual configuration.
 
@@ -135,8 +137,19 @@ Cases display priority with color coding:
 
 - Never commit `.env.local` to version control
 - In production, use environment variables or secure configuration management
+- **Enhanced Security**: This application now uses server-side environment variables instead of client-side `NEXT_PUBLIC_` variables, preventing sensitive configuration from being exposed in the browser
+- **Server Actions**: Configuration is fetched securely using Next.js server actions at runtime
 - Consider implementing additional authorization checks based on your requirements
 - The current implementation fetches all cases - you may want to add customer-specific filtering
+
+## Security Improvements
+
+This version of the portal includes significant security enhancements:
+
+- **No Client-Side Exposure**: Sensitive configuration like Azure AD client IDs, tenant IDs, and Dynamics URLs are no longer exposed to the client-side JavaScript bundle
+- **Server-Side Configuration**: All sensitive configuration is handled server-side using Next.js server actions
+- **Runtime Configuration**: Configuration is fetched securely at runtime rather than being embedded in the build
+- **Better Compliance**: Meets security best practices by keeping sensitive data on the server
 
 ## Next Steps
 

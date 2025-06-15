@@ -1,8 +1,14 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { PublicClientApplication, AccountInfo, AuthenticationResult } from '@azure/msal-browser';
-import { msalConfig, loginRequest } from '../lib/auth-config';
+import {
+  PublicClientApplication,
+  AccountInfo,
+  AuthenticationResult,
+  Configuration,
+  PopupRequest,
+} from '@azure/msal-browser';
+import { getAuthConfig } from '../lib/auth-actions';
 import { dynamicsApi } from '../lib/dynamics-api';
 
 interface AuthContextType {
@@ -16,21 +22,31 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 let msalInstance: PublicClientApplication;
-
-if (typeof window !== 'undefined') {
-  msalInstance = new PublicClientApplication(msalConfig);
-}
+let msalConfig: Configuration;
+let loginRequest: PopupRequest;
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<AccountInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const [configLoaded, setConfigLoaded] = useState(false);
 
   useEffect(() => {
     const initializeMsal = async () => {
       if (typeof window === 'undefined') return;
 
       try {
+        // First, get the auth configuration from the server
+        if (!configLoaded) {
+          const authConfig = await getAuthConfig();
+          msalConfig = authConfig.msalConfig;
+          loginRequest = authConfig.loginRequest;
+
+          // Initialize MSAL instance with the fetched configuration
+          msalInstance = new PublicClientApplication(msalConfig);
+          setConfigLoaded(true);
+        }
+
         await msalInstance.initialize();
 
         // Check if there are any cached accounts
@@ -59,10 +75,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     initializeMsal();
-  }, []);
+  }, [configLoaded]);
 
   const login = async () => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !msalInstance) return;
 
     try {
       setLoading(true);
@@ -81,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const logout = async () => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined' || !msalInstance) return;
 
     try {
       setLoading(true);

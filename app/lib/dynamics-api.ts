@@ -1,4 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
+import { getDynamicsConfig } from './auth-actions';
 
 export interface Case {
   incidentid: string;
@@ -25,11 +26,16 @@ export interface CaseResponse {
 }
 
 class DynamicsApiService {
-  private baseUrl: string;
+  private baseUrl: string | null = null;
   private accessToken: string | null = null;
+  private configInitialized: boolean = false;
 
-  constructor() {
-    this.baseUrl = `${process.env.NEXT_PUBLIC_DYNAMICS_URL}/api/data/v${process.env.NEXT_PUBLIC_DYNAMICS_API_VERSION}`;
+  private async initializeConfig() {
+    if (!this.configInitialized) {
+      const config = await getDynamicsConfig();
+      this.baseUrl = config.baseUrl;
+      this.configInitialized = true;
+    }
   }
 
   setAccessToken(token: string) {
@@ -49,6 +55,12 @@ class DynamicsApiService {
 
   async getCases(customerId?: string): Promise<Case[]> {
     try {
+      await this.initializeConfig();
+
+      if (!this.baseUrl) {
+        throw new Error('Dynamics API configuration not initialized');
+      }
+
       let url = `${this.baseUrl}/incidents`;
 
       // Add expand to get related data
@@ -79,6 +91,12 @@ class DynamicsApiService {
 
   async getCaseById(caseId: string): Promise<Case | null> {
     try {
+      await this.initializeConfig();
+
+      if (!this.baseUrl) {
+        throw new Error('Dynamics API configuration not initialized');
+      }
+
       const url = `${this.baseUrl}/incidents(${caseId})`;
       const expand =
         '$expand=customerid_contact($select=fullname,contactid),customerid_account($select=name,accountid)';
